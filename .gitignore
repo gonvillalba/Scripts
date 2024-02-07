@@ -1,0 +1,12 @@
+/activate
+/activate.bat
+/Activate.ps1
+/deactivate.bat
+/django-admin.exe
+/pip.exe
+/pip3.10.exe
+/pip3.11.exe
+/pip3.exe
+/python.exe
+/pythonw.exe
+/sqlformat.exe
