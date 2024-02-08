@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 class Libro(models.Model):
     titulo = models.CharField(max_length=150)
     autor = models.CharField(max_length=150)
-    genero = models.CharField(max_length=100)
+    genero = models.CharField(max_length=50)
     year_publication = models.DateField()
 
 class Usuario(AbstractUser):

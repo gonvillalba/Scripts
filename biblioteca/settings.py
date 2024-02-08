@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'biblioteca.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'biblioteca',
+        'NAME': 'biblioteca_test',
         'USER': 'bibliotecaAdmin',
         'PASSWORD': 'a.123456',
         'HOST': 'localhost',   # Or the IP address of your PostgreSQL server
