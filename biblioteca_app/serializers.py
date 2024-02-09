@@ -1,18 +1,21 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from .models import Libro, Usuario, Prestamo
 
+#User = get_user_model()
+
 class UsuarioSerializer(serializers.ModelSerializer):
-    pasword = serializers.CharField(write_only=True)
-
-    def Create(self, validated_data):
-        user = Usuario.objects.create_user(**validated_data)
-        return user
-
     class Meta:
         model = Usuario
-        fields = ('username','email','tipo_usuario','password')
+        fields = ('username', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
 
+    def create_user(self, validated_data):        
+        user = Usuario.objects.create_user(**validated_data)
+        user.save()
+        return user
+    
 class CompactLibroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Libro

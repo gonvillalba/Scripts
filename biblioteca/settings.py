@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'biblioteca_app',
     'rest_framework',
+    'rest_framework.authtoken',
     'drf_yasg',
 ]
 
@@ -85,15 +86,20 @@ DATABASES = {
         'PASSWORD': 'a.123456',
         'HOST': 'localhost',   # Or the IP address of your PostgreSQL server
         'PORT': '5432', 
-    }
+    } 
 }
 
-PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+AUTH_USER_MODEL = 'biblioteca_app.Usuario'
+
+#PASSWORD_HASHERS = [
+ #   'django.contrib.auth.hashers.PBKDF2PasswordHasher',
     # Add other hashers if needed
-]
+#]
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
@@ -116,6 +122,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+#AUTHENTICATION_BACKENDS = [
+#    'django.contrib.auth.backends.ModelBackend',
+#]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/

@@ -29,11 +29,11 @@ def create_libro_data(num_records):
 def create_user_data():
     data = []
     arrays = [
-        ['juan',  fake.email(), random.choice(['normal', 'admin']), make_password('123456')],
-        ['ana',  fake.email(), random.choice(['normal', 'admin']), make_password('123456')],
-        ['pedro',  fake.email(), random.choice(['normal', 'admin']), make_password('123456')],
-        ['gonzalo',  fake.email(), random.choice(['normal', 'admin']), make_password('123456')],
-        ['administrator', fake.email(), 'admin',  make_password('123456')]
+        ['juan',  fake.email(), random.choice(['normal', 'admin']), '123456'],
+        ['ana',  fake.email(), random.choice(['normal', 'admin']), '123456'],
+        ['pedro',  fake.email(), random.choice(['normal', 'admin']), '123456'],
+        ['gonzalo',  fake.email(), random.choice(['normal', 'admin']),'123456'],
+        ['administrator', fake.email(), 'admin', '123456']
     ]
     for array in arrays:
         data.append(array)       
@@ -71,7 +71,7 @@ def import_user_to_postgres(filename):
         reader = csv.reader(f)
         next(reader)  # Skip header
         for row in reader:
-            Usuario.objects.create(username=row[0], email=row[1], tipo_usuario=row[2], password=row[3])
+            Usuario.objects.create_user(username=row[0], email=row[1], tipo_usuario=row[2], password=row[3])
     os.remove(filename)
     
 

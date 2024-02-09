@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import (
+    ObtainAuthToken,
     LibrosTodos,
     LibrosDisponibles,
     LibroDetalle,
@@ -8,6 +9,7 @@ from .views import (
     RealizarPrestamo)
 
 urlpatterns = [
+    path('api/token/', ObtainAuthToken.as_view(), name='obtain_auth_token'),
     path('libros/todos/',LibrosTodos.as_view(), name='libros_todos'),
     path('libros/disponibles/',LibrosDisponibles.as_view(), name='libros_disponibles'),
     path('libros/<int:pk>/',LibroDetalle.as_view(), name='libro_detalle'),
