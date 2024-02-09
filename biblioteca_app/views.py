@@ -5,12 +5,12 @@ from rest_framework import status, generics, permissions
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import authenticate
 from .models import Libro, Usuario, Prestamo
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 from .serializers import (
     UsuarioSerializer,
     CompactLibroSerializer,
@@ -69,7 +69,7 @@ class LibroDetalle(generics.RetrieveAPIView):
 class CrearActualizarLibro(generics.CreateAPIView, generics.UpdateAPIView):
     queryset = Libro.objects.all()
     serializer_class = LibroCreateSerializer
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication, JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated,UsuarioIsAdmin]
 
     def create(self, request, *args, **kwargs):
@@ -111,20 +111,24 @@ class PrestamoActivo(generics.ListAPIView):
 class RealizarPrestamo(generics.CreateAPIView)   :
     queryset = Prestamo.objects.all()
     serializer_class = PrestamoCreationSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated,UsuarioIsNormal]
+    authentication_classes = [TokenAuthentication, JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated, UsuarioIsNormal]
 
 
     def create(self, request, *args, **kwargs):   
         usuario_id = self.request.data.get('usuario')
         libro_id = self.request.data.get('libro')
         user = self.request.user
+        token = request.headers.get('Authorization', '').split(' ')[1]
+        access_token = AccessToken(token)
+        user_id = access_token.payload.get('user_id')
+        print(repr(user_id))
 
         usuario = Usuario.objects.filter(pk=usuario_id).first()
         libro = Libro.objects.filter(pk=libro_id).first()
-        print(user)  
+        print(usuario.username,usuario.id,user,user_id)  
 
-        if not usuario or usuario.username == user :
+        if not usuario or usuario.username != user or usuario.id != user_id:
             content = {'error': 'Usuario no existe o no es usted'}
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
         

@@ -1,4 +1,8 @@
 from django.urls import path
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 from .views import (
     ObtainAuthToken,
     LibrosTodos,
@@ -9,7 +13,9 @@ from .views import (
     RealizarPrestamo)
 
 urlpatterns = [
-    path('api/token/', ObtainAuthToken.as_view(), name='obtain_auth_token'),
+    path('api/tokenBasico/', ObtainAuthToken.as_view(), name='obtain_auth_token'),
+    path('api/tokenJWT/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/tokenJWT/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('libros/todos/',LibrosTodos.as_view(), name='libros_todos'),
     path('libros/disponibles/',LibrosDisponibles.as_view(), name='libros_disponibles'),
     path('libros/<int:pk>/',LibroDetalle.as_view(), name='libro_detalle'),
