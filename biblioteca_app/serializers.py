@@ -12,12 +12,36 @@ class UsuarioSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = ('username','email','tipo_usuario','password')
 
-class LibroSerializer(serializers.ModelSerializer):
+class CompactLibroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Libro
-        fields = '__all__'
+        fields = ['id','titulo', 'autor', 'genero']
+
+class PrestamoEstadoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Prestamo
+        fields = ['estado']
+
+class FullLibroSerializer(serializers.ModelSerializer):
+    estado = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Libro
+        fields = ['id','titulo', 'autor', 'genero','estado','estado']
+
+    def get_estado(self,obj):
+        prestamo_existe = Prestamo.objects.filter(libro_id=obj.id).exists()
+        print(prestamo_existe)        
+        if prestamo_existe:
+            prestamo = Prestamo.objects.filter(libro_id=obj.id).latest('fecha_prestamo')
+            print(prestamo.estado) 
+            return prestamo.estado
+        else:
+            return 'devuelto'
+
 
 class PrestamoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prestamo
         fields = '__all__'
+
