@@ -29,7 +29,7 @@ def create_libro_data(num_records):
 def create_user_data():
     data = []
     arrays = [
-        ['juan',  fake.email(), random.choice(['normal', 'admin']), '123456'],
+        ['juan',  fake.email(), 'normal', '123456'],
         ['ana',  fake.email(), random.choice(['normal', 'admin']), '123456'],
         ['pedro',  fake.email(), random.choice(['normal', 'admin']), '123456'],
         ['gonzalo',  fake.email(), random.choice(['normal', 'admin']),'123456'],
