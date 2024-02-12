@@ -35,10 +35,8 @@ class FullLibroSerializer(serializers.ModelSerializer):
 
     def get_estado(self,obj):
         prestamo_existe = Prestamo.objects.filter(libro_id=obj.id).exists()
-        print(prestamo_existe)        
         if prestamo_existe:
             prestamo = Prestamo.objects.filter(libro_id=obj.id).latest('fecha_prestamo')
-            print(prestamo.estado) 
             return prestamo.estado
         else:
             return 'devuelto'

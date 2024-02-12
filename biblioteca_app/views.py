@@ -1,9 +1,10 @@
 from django.shortcuts import render
-from django.http import Http404,HttpResponseBadRequest
+from django.http import QueryDict,Http404,HttpResponseBadRequest
 from django.db.models import Q
 from rest_framework import status, generics, permissions
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate
@@ -56,15 +57,15 @@ class LibrosDisponibles(generics.ListAPIView):
 class LibroDetalle(generics.RetrieveAPIView):    
     queryset = Libro.objects.all()
     serializer_class = FullLibroSerializer
-    def get_object(self,request):
+    def get_object(self):
         pk = self.kwargs.get('pk')    
         try:
             libro = Libro.objects.get(pk=pk)
             return libro 
         except Libro.DoesNotExist:
-            #raise Http404("Libro no encontrado.")
-            content = {'error': 'Libro no encontrado.'}
-            return Response(content, status=status.HTTP_404_NOT_FOUND) 
+            raise NotFound("Libro no encontrado.")
+            #content = {'error': 'Libro no encontrado.'}
+            #return Response(content, status=status.HTTP_404_NOT_FOUND) 
         
 class CrearActualizarLibro(generics.CreateAPIView, generics.UpdateAPIView):
     queryset = Libro.objects.all()
@@ -99,14 +100,18 @@ class PrestamoActivo(generics.ListAPIView):
 
     def get_queryset(self):
         usuario_pk = self.kwargs.get('pk')
-        print(usuario_pk)
-        try:
-            prestamos = self.queryset.filter(usuario_id=usuario_pk)
+        #print(usuario_pk)
+        
+        prestamos = self.queryset.filter(usuario_id=usuario_pk)
+        #print(repr(prestamos))
+        print('Existe:',prestamos.exists())
+        if prestamos.exists():
+            print(prestamos.exists())
             return prestamos
-        except Prestamo.DoesNotExist:
-            #raise Http404("Libro no encontrado.")
-            content = {'error': 'Libro no encontrado.'}
-            return Response(content, status=status.HTTP_404_NOT_FOUND)
+        else:
+            raise NotFound("Sin prestamos activos.")
+            #content = {'error': 'Libro no encontrado.'}
+            #return Response(content, status=status.HTTP_404_NOT_FOUND)
         
 class RealizarPrestamo(generics.CreateAPIView)   :
     queryset = Prestamo.objects.all()
@@ -115,37 +120,37 @@ class RealizarPrestamo(generics.CreateAPIView)   :
     permission_classes = [permissions.IsAuthenticated, UsuarioIsNormal]
 
 
-    def create(self, request, *args, **kwargs):   
-        usuario_id = self.request.data.get('usuario')
+    def create(self, request, *args, **kwargs):
+        user_id = ''
         libro_id = self.request.data.get('libro')
-        user = self.request.user
-        token = request.headers.get('Authorization', '').split(' ')[1]
-        access_token = AccessToken(token)
-        user_id = access_token.payload.get('user_id')
-        print(repr(user_id))
-
-        usuario = Usuario.objects.filter(pk=usuario_id).first()
-        libro = Libro.objects.filter(pk=libro_id).first()
-        print(usuario.username,usuario.id,user,user_id)  
-
-        if not usuario or usuario.username != user or usuario.id != user_id:
-            content = {'error': 'Usuario no existe o no es usted'}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
-        
+        authorization_header = request.headers.get('Authorization')
+        if authorization_header:
+            token_parts = authorization_header.split()
+            if len(token_parts) == 2 and token_parts[0].lower() == 'bearer':
+                token = token_parts[1]
+                access_token = AccessToken(token)
+                user_id = access_token.payload.get('user_id')
+            elif len(token_parts) == 2 and token_parts[0].lower() == 'token':
+                user = request.user
+                user_id = user.id
+        mutable_data = request.data.copy()
+        mutable_data['usuario'] = user_id
+        libro = Libro.objects.filter(pk=libro_id).first()   
         if not libro:
+            print('error libro')
             content = {'error': 'Libro no existe'}
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
         try:
             libroEstado = Prestamo.objects.filter(libro=libro).latest('fecha_prestamo')
             print(libroEstado.estado)
             if libroEstado.estado == 'activo':
+                print('error libro activo')
                 content = {'error': 'Libro en préstamo'}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
         except ObjectDoesNotExist:
             pass
 
-        serializer = self.get_serializer(data = request.data)
-        serializer = self.get_serializer(data = request.data)
+        serializer = self.get_serializer(data = mutable_data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
