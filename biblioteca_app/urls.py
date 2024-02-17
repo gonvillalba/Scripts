@@ -10,12 +10,14 @@ from .views import (
     LibroDetalle,
     CrearActualizarLibro,
     PrestamoActivo,
-    RealizarPrestamo)
+    RealizarPrestamo,
+    CrearUsuario)
 
 urlpatterns = [
     path('api/tokenBasico/', ObtainAuthToken.as_view(), name='obtain_auth_token'),
     path('api/tokenJWT/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/tokenJWT/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('usuario/crear',CrearUsuario.as_view(),name='crear_usuario'),
     path('libros/todos/',LibrosTodos.as_view(), name='libros_todos'),
     path('libros/disponibles/',LibrosDisponibles.as_view(), name='libros_disponibles'),
     path('libros/<int:pk>/',LibroDetalle.as_view(), name='libro_detalle'),

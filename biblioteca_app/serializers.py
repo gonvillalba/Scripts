@@ -15,7 +15,17 @@ class UsuarioSerializer(serializers.ModelSerializer):
         user = Usuario.objects.create_user(**validated_data)
         user.save()
         return user
-    
+
+class UsuarioCrearSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuario
+        fields = ('username', 'password','email')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = get_user_model().objects.create_user(**validated_data)
+        return user
+        
 class CompactLibroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Libro

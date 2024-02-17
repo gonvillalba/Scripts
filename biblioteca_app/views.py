@@ -14,12 +14,26 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.authentication import TokenAuthentication
 from .serializers import (
     UsuarioSerializer,
+    UsuarioCrearSerializer,
     CompactLibroSerializer,
     FullLibroSerializer,
     LibroCreateSerializer,
     PrestamoCreationSerializer,
     PrestamoSerializer)
 # Create your views here.
+
+class CrearUsuario(generics.CreateAPIView):
+    queryset = Usuario.objects.all()
+    permission_classes = (permissions.AllowAny,)
+    serializer_class = UsuarioCrearSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        serialized_user = UsuarioSerializer(user)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serialized_user.data, status=status.HTTP_201_CREATED,headers=headers)
 
 
 class ObtainAuthToken(generics.GenericAPIView):
